@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCookie = void 0;
+exports.getHomePage = getHomePage;
 exports.isCookieValid = isCookieValid;
 const axios_1 = __importDefault(require("axios"));
 const qs_1 = __importDefault(require("qs"));
@@ -35,8 +36,7 @@ const getCookie = async (username, password) => {
     return cookie;
 };
 exports.getCookie = getCookie;
-async function isCookieValid(cookie) {
-    console.log(cookie);
+async function getHomePage(cookie) {
     const axiosInstance = axios_1.default.create();
     axiosInstance.defaults.headers.Cookie = cookie;
     const config = {
@@ -44,7 +44,12 @@ async function isCookieValid(cookie) {
         maxBodyLength: Infinity,
         url: 'http://lms.ui.ac.ir/members/home',
     };
-    const validity = axiosInstance.request(config)
+    const response = axiosInstance.request(config);
+    return response;
+}
+async function isCookieValid(cookie) {
+    console.log(cookie);
+    const validity = getHomePage(cookie)
         .then(res => true)
         .catch(err => {
         if (err.response.status == 302)

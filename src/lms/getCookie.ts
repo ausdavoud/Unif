@@ -33,19 +33,24 @@ export const getCookie = async (username: string, password: string) => {
     return cookie
 };
 
-export async function isCookieValid(cookie: string) {
-
-    console.log(cookie)
+export async function getHomePage(cookie: string): Promise<axios.AxiosResponse> {
     const axiosInstance = axios.create()
     axiosInstance.defaults.headers.Cookie = cookie
-
+    
     const config = {
         maxRedirects: 0,
         maxBodyLength: Infinity,
         url: 'http://lms.ui.ac.ir/members/home',
     }
+    
+    const response = axiosInstance.request(config)
+    return response
+}
 
-    const validity = axiosInstance.request(config)
+export async function isCookieValid(cookie: string) {
+
+    console.log(cookie)
+    const validity = getHomePage(cookie)
     .then(res => true)
     .catch(err => {
         if (err.response.status == 302) return false
