@@ -1,17 +1,15 @@
 import * as cheerio from 'cheerio'
-import { getHomePage, getCookie } from './getCookie'
+import { getCookie } from './getCookie'
+import { getPageContent } from './requests'
 
-async function getHomePageContent(cookie:string) {
-    const homePageContent = getHomePage(cookie)
-                    .then(res => res.data)
-                    .catch(err => err)
-    return homePageContent
-}
-
-export async function getGroupNames(cookie:string) {
-    const homePageContent = await getHomePageContent(cookie)
-    const groupNames = findGroupNames(homePageContent)
-    return groupNames
+export function getGroupNames(cookie:string) {
+    const homePageURL = 'http://lms.ui.ac.ir/members/home' 
+    return getPageContent(homePageURL, cookie)
+        .then(findGroupNames)
+        .catch(err => {
+            console.error('Error in loading the home page for getting the group names.')
+            throw err
+        })
 }
 
 function findGroupNames(homePageContent:string) {
@@ -34,5 +32,4 @@ async function testGetGroupNames() {
                 .then(console.log)
 
 }
-
 // testGetGroupNames()
