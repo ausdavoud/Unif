@@ -3,13 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCookie = void 0;
-exports.getHomePage = getHomePage;
+exports.getCookie = getCookie;
 exports.isCookieValid = isCookieValid;
 const axios_1 = __importDefault(require("axios"));
 const qs_1 = __importDefault(require("qs"));
 require("dotenv/config");
-const getCookie = async (username, password) => {
+const requests_1 = require("./requests");
+function getCookie(username, password) {
     const axiosInstance = axios_1.default.create();
     const payload = qs_1.default.stringify({
         'username': username,
@@ -26,35 +26,34 @@ const getCookie = async (username, password) => {
         data: payload
     };
     const cookie = axiosInstance.request(config)
-        .then(res => Promise.reject("LMS didn't redirect to home after login. Possibility of failed login."))
+        .then(res => {
+        throw new Error();
+    })
         .catch(err => {
         if (err.response && err.response.status == 302) {
             return err.response.headers['set-cookie'][1];
         }
-        Promise.reject(err);
+        console.error(`Error in getting the cookie. Probably the status code was 
+            not 302, meaning no redirect happened after Login.`);
+        throw err;
     });
     return cookie;
-};
-exports.getCookie = getCookie;
-async function getHomePage(cookie) {
-    const axiosInstance = axios_1.default.create();
-    axiosInstance.defaults.headers.Cookie = cookie;
-    const config = {
-        maxRedirects: 0,
-        maxBodyLength: Infinity,
-        url: 'http://lms.ui.ac.ir/members/home',
-    };
-    const response = axiosInstance.request(config);
-    return response;
 }
-async function isCookieValid(cookie) {
-    console.log(cookie);
-    const validity = getHomePage(cookie)
+;
+function isCookieValid(cookie) {
+    const URL = 'http://lms.ui.ac.ir/members/home';
+    const validity = (0, requests_1.getURL)(URL, cookie)
         .then(res => true)
         .catch(err => {
-        if (err.response.status == 302)
+        if (err.response.status == 302) {
+            console.error(`Error in validating cookie. Home page redirects
+            to another page which is probably the login page, so the cookie
+            was probably not valid.`);
             return false;
-        return Promise.reject(err);
+        }
+        console.error(`Error in validating the cookie. 
+        The error was **not** caused by status code 302.`);
+        throw err;
     });
     return validity;
 }
@@ -63,8 +62,8 @@ function testLogin() {
     const password = process.env.lmsPassword || '';
     console.log('username', username);
     console.log('password', password);
-    const cookie = (0, exports.getCookie)(username, password)
-        .then(cookie => isCookieValid(cookie))
+    const cookie = getCookie(username, password)
+        .then(isCookieValid)
         .then(console.log)
         .catch(console.log);
 }

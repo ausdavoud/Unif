@@ -26,16 +26,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGroupNames = getGroupNames;
 const cheerio = __importStar(require("cheerio"));
 const getCookie_1 = require("./getCookie");
-async function getHomePageContent(cookie) {
-    const homePageContent = (0, getCookie_1.getHomePage)(cookie)
-        .then(res => res.data)
-        .catch(err => err);
-    return homePageContent;
-}
-async function getGroupNames(cookie) {
-    const homePageContent = await getHomePageContent(cookie);
-    const groupNames = findGroupNames(homePageContent);
-    return groupNames;
+const requests_1 = require("./requests");
+function getGroupNames(cookie) {
+    const homePageURL = 'http://lms.ui.ac.ir/members/home';
+    return (0, requests_1.getPageContent)(homePageURL, cookie)
+        .then(findGroupNames)
+        .catch(err => {
+        console.error('Error in loading the home page for getting the group names.');
+        throw err;
+    });
 }
 function findGroupNames(homePageContent) {
     const $ = cheerio.load(homePageContent);
