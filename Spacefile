@@ -1,2 +1,12 @@
 # Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
 v: 0
+micros:
+    - name: db
+      src: "./public/db"
+      engine: nodejs16 
+    
+    - name: lms
+      src: "./public/lms"
+      engine: nodejs16
+      primary: true
+      dev: nodemon app.js
