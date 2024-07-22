@@ -8,4 +8,5 @@ if (!DetaProjectKey) {
 const detaDB = Deta(DetaProjectKey)
 export const fileDB = detaDB.Drive('file')
 export const queueDB = detaDB.Base('queue')
-export const sentDB = detaDB.Base('sent')
+export const publicSentDB = detaDB.Base('publicSent')
+export const privateSentDB = detaDB.Base('privateSent')

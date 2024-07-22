@@ -21,8 +21,9 @@ export function getPageContent(URL: string, cookie: string) {
     return getURL(URL, cookie)
         .then((res) => res.data)
         .catch((err) => {
-            console.error(`Error in getting ${URL}. This happened before we could 
-            access the response to call 'res.data'.`);
+            console.error(`Error on getting page content of ${URL}. This happened 
+            \rbefore we could access the response to call 'res.data'.`);
+            err.handled = true;
             throw err;
         });
 }
@@ -47,6 +48,7 @@ export function getFile(URL: string, cookie: string) {
         })
         .catch((err) => {
             console.log(`Error downloading file with url ${URL}`);
+            err.handled = true;
             throw err;
         });
     return buff;

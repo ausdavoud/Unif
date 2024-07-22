@@ -31,7 +31,10 @@ function getGroupNames(cookie) {
     return (0, requests_1.getPageContent)(homePageURL, cookie)
         .then(selectGroupNames)
         .catch((err) => {
-        console.error("Error in loading the home page for getting the group names.");
+        if (!err.handled) {
+            console.error(`Error in using css selector to extract groupNames
+                    \rfrom hom page. Probably an error in CheerIO.`);
+        }
         throw err;
     });
 }

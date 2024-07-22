@@ -1,5 +1,4 @@
 import * as cheerio from "cheerio";
-import { getCookie } from "./cookie";
 import { getPageContent } from "./requests";
 
 export function getGroupNames(cookie: string) {
@@ -7,9 +6,12 @@ export function getGroupNames(cookie: string) {
     return getPageContent(homePageURL, cookie)
         .then(selectGroupNames)
         .catch((err) => {
-            console.error(
-                "Error in loading the home page for getting the group names."
-            );
+            if (!err.handled) {
+                console.error(
+                    `Error in using css selector to extract groupNames
+                    \rfrom hom page. Probably an error in CheerIO.`
+                );
+            }
             throw err;
         });
 }

@@ -34,7 +34,8 @@ function getCookie(username, password) {
             return err.response.headers["set-cookie"][1];
         }
         console.error(`Error in getting the cookie. Probably the status code was 
-            not 302, meaning no redirect happened after Login.`);
+            \rnot 302, meaning no redirect happened after Login.`);
+        err.handled = true;
         throw err;
     });
     return cookie;
@@ -46,12 +47,13 @@ function isCookieValid(cookie) {
         .catch((err) => {
         if (err.response.status == 302) {
             console.error(`Error in validating cookie. Home page redirects
-            to another page which is probably the login page, so the cookie
-            was probably not valid.`);
+            \rto another page which is probably the login page, so the cookie
+            \rwas probably not valid.`);
             return false;
         }
         console.error(`Error in validating the cookie. 
-        The error was **not** caused by status code 302.`);
+        \rThe error was **not** caused by status code 302. Maybe a network error?`);
+        err.handled = true;
         throw err;
     });
     return validity;
