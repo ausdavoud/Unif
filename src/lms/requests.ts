@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, { ResponseType } from "axios"
 
 export function getURL(URL:string, cookie:string): Promise<axios.AxiosResponse> {
     const axiosInstance = axios.create()
@@ -22,4 +22,26 @@ export function getPageContent(URL:string, cookie:string) {
             access the response to call 'res.data'.`)
             throw err
         })
+}
+
+export function getFile(URL:string, cookie:string) {
+    const axiosInstance = axios.create()
+    axiosInstance.defaults.headers.Cookie = cookie
+    const config = {
+        responseType: "arraybuffer" as ResponseType
+    }
+    const buff = axiosInstance.get(URL, config)
+        .then(res => {
+            return toBuffer(res.data)
+        })
+        .catch(err => {
+            console.log(`Error downloading file with url ${URL}`)
+            throw err
+        })
+    return buff
+}
+
+function toBuffer(data: string) {
+    const dataBuffer = Buffer.from(data, 'binary')
+    return dataBuffer
 }
