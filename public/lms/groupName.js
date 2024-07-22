@@ -25,33 +25,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGroupNames = getGroupNames;
 const cheerio = __importStar(require("cheerio"));
-const getCookie_1 = require("./getCookie");
 const requests_1 = require("./requests");
 function getGroupNames(cookie) {
-    const homePageURL = 'http://lms.ui.ac.ir/members/home';
+    const homePageURL = "http://lms.ui.ac.ir/members/home";
     return (0, requests_1.getPageContent)(homePageURL, cookie)
-        .then(findGroupNames)
-        .catch(err => {
-        console.error('Error in loading the home page for getting the group names.');
+        .then(selectGroupNames)
+        .catch((err) => {
+        console.error("Error in loading the home page for getting the group names.");
         throw err;
     });
 }
-function findGroupNames(homePageContent) {
+function selectGroupNames(homePageContent) {
     const $ = cheerio.load(homePageContent);
     const groupNames = [];
-    $('#profile_groups li').each((i, elem) => {
-        let groupName = $(elem).find('a').attr('href');
+    $("#profile_groups li").each((i, elem) => {
+        let groupName = $(elem).find("a").attr("href");
         if (groupName) {
             groupNames[i] = groupName;
         }
     });
     return groupNames;
 }
-async function testGetGroupNames() {
-    const username = process.env.lmsUsername || '';
-    const password = process.env.lmsPassword || '';
-    const groupNames = (0, getCookie_1.getCookie)(username, password)
-        .then(getGroupNames)
-        .then(console.log);
-}
-// testGetGroupNames()
