@@ -1,6 +1,5 @@
 import axios from 'axios'
 import qs from 'qs'
-import 'dotenv/config'
 import { getURL } from './requests';
 
 export function getCookie(username: string, password: string) {

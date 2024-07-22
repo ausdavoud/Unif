@@ -7,7 +7,6 @@ exports.getCookie = getCookie;
 exports.isCookieValid = isCookieValid;
 const axios_1 = __importDefault(require("axios"));
 const qs_1 = __importDefault(require("qs"));
-require("dotenv/config");
 const requests_1 = require("./requests");
 function getCookie(username, password) {
     const axiosInstance = axios_1.default.create();
