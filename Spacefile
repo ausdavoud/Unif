@@ -2,11 +2,17 @@
 v: 0
 micros:
     - name: db
-      src: "./public/db"
+      src: "./dist/src/db"
       engine: nodejs16 
     
     - name: lms
-      src: "./public/lms"
+      src: "./dist/src/lms"
+      engine: nodejs16
+      primary: false
+      dev: nodemon app.js
+
+    - name: test
+      src: "./dist/test/local"
       engine: nodejs16
       primary: true
       dev: nodemon app.js
