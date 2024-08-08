@@ -109,7 +109,7 @@ function isXChanged(oldMessage: Message, newMessage: Message) {
     };
 }
 
-export function isNewMessageChanged(newMessage: Message, oldMessage: Message) {
+export function messagesAreDifferent(newMessage: Message, oldMessage: Message) {
     const {
         isExerciseChanged,
         isExerciseFinishedChanged,

@@ -10,9 +10,10 @@ import {
 import { Message } from "../../src/lms/messageInterface";
 import {
     addMessageHeaderFooter,
-    isNewMessageChanged,
+    messagesAreDifferent,
 } from "../../src/lms/messageAnalyze";
-import { sortByDate} from "../../src/lms/utils";
+import { getLatestByDate } from "../../src/lms/utils";
+import { fetchByAuthorText } from "../../src/db/tools";
 
 export function testAnalyzeMessages() {
     const username = process.env.lmsUsername || "";
@@ -44,37 +45,38 @@ export function testAnalyzeMessages() {
         })
         .then((newMessagesInFeed) => {
             if (newMessagesInFeed.length == 0) {
-                throw new Error('No message in feed.')
+                throw new Error("No message in feed.");
             }
             return newMessagesInFeed[0];
         })
-        .then((newMessageInFeed) => {
-            const { author, text } = newMessageInFeed;
-            const oldAndNewMessages = queueDB
-                .fetch({ author: author, text: text })
-                .then((oldMessagesInDB) => {
-                    if (oldMessagesInDB.count == 0)
-                        throw new Error("Message not found in Detabase!");
-                    return [newMessageInFeed, oldMessagesInDB]
-                });
-            return oldAndNewMessages;
-        })
-        .then(([newMessageInFeed, oldMessagesInDB]) => {
+        .then((newMessageInFeed) =>
+            fetchByAuthorText(newMessageInFeed as unknown as Message)
+        )
+        .then((newAndOldMessages) => {
+            const [newMessageInFeed, oldMessagesInDB] = newAndOldMessages;
             // Possible cause of error:
             const items = oldMessagesInDB.items as ObjectType[];
-            sortByDate(items)
-            const lastMessageInDB = items[0];
+            const lastMessageInDB = getLatestByDate(items);
 
             // Possible cause of error
-            const newMessageInFeedCasted = newMessageInFeed as unknown as Message;
+            const newMessageInFeedCasted =
+                newMessageInFeed as unknown as Message;
             const lastMessageInDBCasted = lastMessageInDB as unknown as Message;
-            if (isNewMessageChanged(newMessageInFeedCasted, lastMessageInDBCasted)) {
-                addMessageHeaderFooter(newMessageInFeedCasted, lastMessageInDBCasted);
-                return newMessageInFeedCasted
+            if (
+                messagesAreDifferent(
+                    newMessageInFeedCasted,
+                    lastMessageInDBCasted
+                )
+            ) {
+                addMessageHeaderFooter(
+                    newMessageInFeedCasted,
+                    lastMessageInDBCasted
+                );
+                return newMessageInFeedCasted;
             }
-            throw new Error("New message was the same as old message in db.")
+            throw new Error("New message was the same as old message in db.");
         })
-        .then(newMessage => queueDB.put(newMessage as unknown as ObjectType))
+        .then((newMessage) => queueDB.put(newMessage as unknown as ObjectType))
         .then(console.log)
         .catch(console.log);
 }
