@@ -6,7 +6,7 @@ import {
     onHasAttachmentChange,
     onAttachmentLinkAndTextChange,
     onAttachmentLinkChange,
-    onAttachmentTextChange,
+    onAttachmentNameChange,
     onIsExerciseNameChange,
     onIsExerciseStartChange,
 } from "./messageChangeStates";
@@ -30,12 +30,12 @@ export function addMessageHeaderFooter(
     const minorChanges: string[] = [];
 
     if (isExerciseChanged) {
-        onIsExerciseChange(newMessage);
+        onIsExerciseChange(newMessage, oldMessage);
         hasMajorChange = true;
         return undefined;
     }
     if (isExerciseFinishedChanged) {
-        onIsExerciseFinishedChange(newMessage);
+        onIsExerciseFinishedChange(newMessage, oldMessage);
         hasMajorChange = true;
     }
     if (isExerciseDeadlineChanged && !isExerciseFinishedChanged) {
@@ -59,7 +59,7 @@ export function addMessageHeaderFooter(
         onAttachmentLinkChange(newMessage, hasMajorChange, minorChanges);
         hasMajorChange = true;
     } else if (isAttachmentNameChanged) {
-        onAttachmentTextChange(newMessage, hasMajorChange, minorChanges);
+        onAttachmentNameChange(newMessage, hasMajorChange, minorChanges);
         hasMajorChange = true;
     } else if (newMessage.hasAttachment) {
         // why don't we just put true? Because the old message
@@ -92,13 +92,20 @@ export function addMessageHeaderFooter(
 function isXChanged(oldMessage: Message, newMessage: Message) {
     return {
         isExerciseChanged: oldMessage.isExercise !== newMessage.isExercise,
-        isExerciseFinishedChanged: oldMessage.isExerciseFinished !== newMessage.isExerciseFinished,
-        isExerciseDeadlineChanged: oldMessage.exerciseDeadline !== newMessage.exerciseDeadline,
-        isHasAttachmentChanged: oldMessage.hasAttachment !== newMessage.hasAttachment,
-        isAttachmentLinkChanged: oldMessage.attachmentLink !== newMessage.attachmentLink,
-        isAttachmentNameChanged: oldMessage.attachmentName !== newMessage.attachmentName,
-        isExerciseNameChanged: oldMessage.exerciseName !== newMessage.exerciseName,
-        isExerciseStartChanged: oldMessage.exerciseStart !== newMessage.exerciseStart,
+        isExerciseFinishedChanged:
+            oldMessage.isExerciseFinished !== newMessage.isExerciseFinished,
+        isExerciseDeadlineChanged:
+            oldMessage.exerciseDeadline !== newMessage.exerciseDeadline,
+        isHasAttachmentChanged:
+            oldMessage.hasAttachment !== newMessage.hasAttachment,
+        isAttachmentLinkChanged:
+            oldMessage.attachmentLink !== newMessage.attachmentLink,
+        isAttachmentNameChanged:
+            oldMessage.attachmentName !== newMessage.attachmentName,
+        isExerciseNameChanged:
+            oldMessage.exerciseName !== newMessage.exerciseName,
+        isExerciseStartChanged:
+            oldMessage.exerciseStart !== newMessage.exerciseStart,
     };
 }
 
