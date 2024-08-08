@@ -90,31 +90,15 @@ export function addMessageHeaderFooter(
 }
 
 function isXChanged(oldMessage: Message, newMessage: Message) {
-    const isExerciseChanged = oldMessage.isExercise != newMessage.isExercise;
-    const isExerciseFinishedChanged =
-        oldMessage.isExerciseFinished != newMessage.isExerciseFinished;
-    const isExerciseDeadlineChanged =
-        oldMessage.exerciseDeadline != newMessage.exerciseDeadline;
-    const isHasAttachmentChanged =
-        oldMessage.hasAttachment != newMessage.hasAttachment;
-    const isAttachmentLinkChanged =
-        oldMessage.attachmentLink != newMessage.attachmentLink;
-    const isAttachmentNameChanged =
-        oldMessage.attachmentName != newMessage.attachmentName;
-    const isExerciseNameChanged =
-        oldMessage.exerciseName != newMessage.exerciseName;
-    const isExerciseStartChanged =
-        oldMessage.exerciseStart != newMessage.exerciseStart;
-
     return {
-        isExerciseChanged,
-        isExerciseFinishedChanged,
-        isExerciseDeadlineChanged,
-        isHasAttachmentChanged,
-        isAttachmentLinkChanged,
-        isAttachmentNameChanged,
-        isExerciseNameChanged,
-        isExerciseStartChanged,
+        isExerciseChanged: oldMessage.isExercise !== newMessage.isExercise,
+        isExerciseFinishedChanged: oldMessage.isExerciseFinished !== newMessage.isExerciseFinished,
+        isExerciseDeadlineChanged: oldMessage.exerciseDeadline !== newMessage.exerciseDeadline,
+        isHasAttachmentChanged: oldMessage.hasAttachment !== newMessage.hasAttachment,
+        isAttachmentLinkChanged: oldMessage.attachmentLink !== newMessage.attachmentLink,
+        isAttachmentNameChanged: oldMessage.attachmentName !== newMessage.attachmentName,
+        isExerciseNameChanged: oldMessage.exerciseName !== newMessage.exerciseName,
+        isExerciseStartChanged: oldMessage.exerciseStart !== newMessage.exerciseStart,
     };
 }
 
