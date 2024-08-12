@@ -10,7 +10,10 @@ export function testLocalHTML() {
         encoding: "utf-8",
     });
     const feedElements = findFeedMessages(sampleHTML);
-    const msgBody = createMessageBody(feedElements[2]);
+    const msgBody = createMessageBody(
+        feedElements[2],
+        "code for mohasebat elmi"
+    );
 }
 
 export function testFindFeedMessages() {
@@ -45,7 +48,10 @@ export function testFindFeedMessages() {
                 throw err;
             })
             .then((feedElements) => {
-                return createMessageBody(feedElements[0]);
+                return createMessageBody(
+                    feedElements[0],
+                    "lesson code here..."
+                );
             })
             .catch((err) => {
                 if (err.handled) return;

@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { Message } from "./messageInterface";
 
 export function findFeedMessages(groupPageContent: string) {
     const feedMessages: string[] = [];
@@ -12,7 +13,10 @@ export function findFeedMessages(groupPageContent: string) {
     return feedMessages;
 }
 
-export function createMessageBody(feedElement: string) {
+export function createMessageBody(
+    feedElement: string,
+    groupName: string
+): Message {
     // Extract message text and shape the overall structure to store in db;
     const $ = cheerio.load(feedElement);
     const author = $('a[class~="feed_item_username"]').text();
@@ -34,8 +38,8 @@ export function createMessageBody(feedElement: string) {
     let exerciseName = "";
     let exerciseStart = "";
     let exerciseDeadline = "";
-    let dateUpdated = new Date().toISOString()
-    
+    let dateUpdated = new Date().toISOString();
+
     if (attachment.length != 0) {
         const attachmentSpans = $(attachment).find("span");
         if (attachmentSpans.length == 0) {
@@ -53,30 +57,31 @@ export function createMessageBody(feedElement: string) {
             exerciseName = exerciseName
                 .slice(exerciseName.indexOf(":") + 1)
                 .trim();
-                // attachment
-                if (attachmentSpans.eq(1).has("a")) {
-                    const anchorTag = attachmentSpans.eq(1).find("a");
-                    hasAttachment = true;
-                    attachmentName = anchorTag.text();
-                    attachmentLink = anchorTag.attr("href")!;
+            // attachment
+            if (attachmentSpans.eq(1).has("a")) {
+                const anchorTag = attachmentSpans.eq(1).find("a");
+                hasAttachment = true;
+                attachmentName = anchorTag.text();
+                attachmentLink = anchorTag.attr("href")!;
             }
             // start
             exerciseStart = attachmentSpans.eq(2).text();
             exerciseStart = exerciseStart
-            .slice(exerciseStart.indexOf(":") + 1)
+                .slice(exerciseStart.indexOf(":") + 1)
                 .trim();
             // deadline
             exerciseDeadline = attachmentSpans.eq(3).text();
             exerciseDeadline = exerciseDeadline
-            .slice(exerciseDeadline.indexOf(":") + 1)
-            .trim();
+                .slice(exerciseDeadline.indexOf(":") + 1)
+                .trim();
             if (exerciseDeadline.includes("پایان")) {
                 isExerciseFinished = true;
             }
         }
     }
-    
+
     const msgBody = {
+        groupName,
         author,
         text,
         date,
@@ -92,7 +97,7 @@ export function createMessageBody(feedElement: string) {
         exerciseStart,
         exerciseDeadline,
         isExerciseFinished,
-        dateUpdated
+        dateUpdated,
     };
 
     return msgBody;

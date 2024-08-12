@@ -32,7 +32,9 @@ export function testPushMessage() {
         .then((feedElements) => {
             const messages: object[] = [];
             feedElements.forEach((feedElement) => {
-                messages.push(createMessageBody(feedElement));
+                messages.push(
+                    createMessageBody(feedElement, "code for lesson")
+                );
             });
             return messages as ObjectType[];
         })
