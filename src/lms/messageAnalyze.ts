@@ -15,6 +15,10 @@ export function addMessageHeaderFooter(
     newMessage: Message,
     oldMessage: Message
 ) {
+    if (!oldMessage) {
+        newMessage.header = `پیام جدید از ${newMessage.author}`;
+        return;
+    }
     const {
         isExerciseChanged,
         isExerciseFinishedChanged,
@@ -81,12 +85,10 @@ export function addMessageHeaderFooter(
     }
 
     const whiteSpace = "‌";
-    const footerText =
-        minorChanges.length > 0
-            ? minorChanges.join("\n- ") + "\n" + whiteSpace
-            : "";
-
-    newMessage.footer = footerText;
+    if (minorChanges) {
+        const footerText = `${minorChanges.join("\n- ")} \n${whiteSpace}`;
+        newMessage.footer = footerText;
+    }
 }
 
 function isXChanged(oldMessage: Message, newMessage: Message) {
@@ -110,6 +112,10 @@ function isXChanged(oldMessage: Message, newMessage: Message) {
 }
 
 export function messagesAreDifferent(newMessage: Message, oldMessage: Message) {
+    if (!oldMessage) {
+        console.log("No old message from DB.");
+        return true;
+    }
     const {
         isExerciseChanged,
         isExerciseFinishedChanged,
