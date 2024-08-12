@@ -51,7 +51,7 @@ export function isCookieValid(cookie: string) {
             }
             console.error(`Error in validating the cookie. 
         \rThe error was **not** caused by status code 302. Maybe a network error?`);
-            err.handled = true
+            err.handled = true;
             throw err;
         });
 
