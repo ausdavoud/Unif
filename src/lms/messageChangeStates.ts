@@ -9,10 +9,10 @@ export function onIsExerciseChange(newMessage: Message, oldMessage: Message) {
     // `message` is the message which still has the exercise name on it.
     const message = newMessage.isExercise ? newMessage : oldMessage;
     const exerciseName = message.exerciseName ? `${message.exerciseName} ` : "";
-    const action = newMessage.isExercise ? "اضافه کرد" : "حذف کرد";
+    const action = newMessage.isExercise ? "اضافه کرد." : "حذف کرد.";
 
     // note the removal of space between `exerciseName` and `را`
-    newMessage.header = `${newMessage.author} تمرین ${exerciseName}را ${action}.`;
+    newMessage.header = `${newMessage.author} تمرین ${exerciseName}را ${action}`;
 }
 
 export function onIsExerciseFinishedChange(

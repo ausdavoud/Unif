@@ -1,6 +1,6 @@
-import { ObjectType } from "deta/dist/types/types/basic";
+import { Message } from "./messageInterface";
 
-function sortByDate(messageList: ObjectType[]) {
+function sortByDate(messageList: Message[]) {
     messageList.sort((a, b) => {
         return (
             new Date(b.dateUpdated as string).getTime() -
@@ -9,8 +9,7 @@ function sortByDate(messageList: ObjectType[]) {
     });
 }
 
-
-export function getLatestByDate(messageList: ObjectType[]) {
-    sortByDate(messageList)
-    return messageList[0]
+export function getLatestByDate(messageList: Message[]) {
+    sortByDate(messageList);
+    return messageList[0];
 }
