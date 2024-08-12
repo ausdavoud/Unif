@@ -13,72 +13,47 @@ import {
     messagesAreDifferent,
 } from "../../src/lms/messageAnalyze";
 import { getLatestByDate } from "../../src/lms/utils";
-import { fetchByAuthorText } from "../../src/db/tools";
+import { fetchByAuthorText, putToDB } from "../../src/db/dbInterface";
 
-export function testAnalyzeMessages() {
+export async function testAsyncAnalyze() {
     const username = process.env.lmsUsername || "";
     const password = process.env.lmsPassword || "";
     console.log("username", username);
     console.log("password", password);
-    return getCookie(username, password)
-        .then((cookie) => {
-            if (!isCookieValid(cookie)) throw new Error();
-            return cookie;
-        })
-        .then((cookie) => {
-            return getGroupNames(cookie).then((groupNames) => [
-                groupNames,
-                cookie,
-            ]);
-            // cuz we need cookie for the next .then
-        })
-        .then(([groupNames, cookie]) => {
-            return getGroupPageContent(groupNames[0], cookie);
-        })
-        .then(findFeedMessages)
-        .then((feedElements) => {
-            const newMessagesInFeed: object[] = [];
-            feedElements.forEach((feedElement) => {
-                newMessagesInFeed.push(createMessageBody(feedElement));
-            });
-            return newMessagesInFeed as ObjectType[];
-        })
-        .then((newMessagesInFeed) => {
-            if (newMessagesInFeed.length == 0) {
-                throw new Error("No message in feed.");
-            }
-            return newMessagesInFeed[0];
-        })
-        .then((newMessageInFeed) =>
-            fetchByAuthorText(newMessageInFeed as unknown as Message)
-        )
-        .then((newAndOldMessages) => {
-            const [newMessageInFeed, oldMessagesInDB] = newAndOldMessages;
-            // Possible cause of error:
-            const items = oldMessagesInDB.items as ObjectType[];
-            const lastMessageInDB = getLatestByDate(items);
 
-            // Possible cause of error
-            const newMessageInFeedCasted =
-                newMessageInFeed as unknown as Message;
-            const lastMessageInDBCasted = lastMessageInDB as unknown as Message;
-            if (
-                messagesAreDifferent(
-                    newMessageInFeedCasted,
-                    lastMessageInDBCasted
-                )
-            ) {
-                addMessageHeaderFooter(
-                    newMessageInFeedCasted,
-                    lastMessageInDBCasted
+    const cookie = await getCookie(username, password);
+    if (!isCookieValid(cookie)) {
+        throw new Error("Cookie is not valid.");
+    }
+    const groupNames = await getGroupNames(cookie);
+    groupNames.forEach(async (groupName) => {
+        const groupPageContent = await getGroupPageContent(groupName, cookie);
+        const feedMessages = findFeedMessages(groupPageContent);
+        if (feedMessages.length == 0) {
+            console.log(`No old or new message in ${groupName}'s feed.`);
+            return;
+        }
+
+        feedMessages.forEach(async (feedMessage) => {
+            const newMessageInFeed = createMessageBody(feedMessage, groupName);
+            const fetchedMessages = await fetchByAuthorText(newMessageInFeed);
+            const oldMessagesInDB =
+                fetchedMessages.items as unknown as Message[];
+            const oldMessageInDB = getLatestByDate(oldMessagesInDB);
+            if (!messagesAreDifferent(newMessageInFeed, oldMessageInDB)) {
+                console.log(
+                    "New message(lms) and old message(db) are the same."
                 );
-                return newMessageInFeedCasted;
+                return;
             }
-            throw new Error("New message was the same as old message in db.");
-        })
-        .then((newMessage) => queueDB.put(newMessage as unknown as ObjectType))
-        .then(console.log)
-        .catch(console.log);
+            addMessageHeaderFooter(newMessageInFeed, oldMessageInDB);
+            const putResult = await putToDB(queueDB, newMessageInFeed);
+            const putMsg = putResult
+                ? `Message with key ${putResult["key"]} from ${newMessageInFeed.author} was put in QueueDB.`
+                : `Failed putting message from ${newMessageInFeed.author} to QueueDB.`;
+            console.log(putMsg);
+        });
+    });
 }
 
-// testAnalyzeMessages()
+// testAsyncAnalyze()
