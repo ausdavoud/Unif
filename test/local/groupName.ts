@@ -1,11 +1,11 @@
-import { getCookie } from "../../src/lms/cookie";
-import { getGroupNames } from "../../src/lms/groupName";
+import { getCookie } from "../../src/lms/commonUtils/cookie";
+import { getGroupCodes } from "../../src/lms/PublicMessage/groupCodeScraper";
 
 async function testGetGroupNames() {
-    const username = process.env.lmsUsername || "";
-    const password = process.env.lmsPassword || "";
-    const groupNames = getCookie(username, password)
-        .then(getGroupNames)
-        .then(console.log);
+  const username = process.env.LMS_USERNAME || "";
+  const password = process.env.LMS_PASSWORD || "";
+  const groupNames = getCookie(username, password)
+    .then(getGroupCodes)
+    .then(console.log);
 }
 // testGetGroupNames()
