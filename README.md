@@ -1,1 +1,1 @@
-Notification Service for LMS with Node.js, Deta and Telegram
+Notification Service for LMS using Node.js, MongoDB and Telegram
