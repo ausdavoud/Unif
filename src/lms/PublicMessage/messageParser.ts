@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { PublicMessage } from "../commonUtils/messageTypes";
+import env from "../../env";
 
 export function findFeedMessages(groupPageContent: string) {
   const feedMessages: string[] = [];
@@ -30,7 +31,8 @@ export function createMessageBody(
   let isAttachmentLarge = false;
   let isAttachmentStored = false;
   const isAttachmentSent = false;
-  const attachmentStorageErrorCount = 0;
+  const attachmentDownloadErrorCount = 0;
+  const attachmentUploadErrorCount = 0;
   let attachmentName;
   let attachmentLink;
   let isExercise = false;
@@ -49,6 +51,7 @@ export function createMessageBody(
       const anchorTag = attachment.find("a");
       attachmentName = anchorTag.text();
       attachmentLink = anchorTag.attr("href")!;
+      attachmentLink = env.BASE_URL + attachmentLink;
     } else {
       isExercise = true;
       // title
@@ -61,6 +64,7 @@ export function createMessageBody(
         hasAttachment = true;
         attachmentName = anchorTag.text();
         attachmentLink = anchorTag.attr("href")!;
+        attachmentLink = env.BASE_URL + attachmentLink;
       }
       // start
       exerciseStart = attachmentSpans.eq(2).text();
@@ -82,12 +86,13 @@ export function createMessageBody(
     groupName,
     author,
     text,
-    sentAt: sentAt,
+    sentAt,
     hasAttachment,
     isAttachmentStored,
     isAttachmentLarge,
     isAttachmentSent,
-    attachmentStorageErrorCount,
+    attachmentDownloadErrorCount,
+    attachmentUploadErrorCount,
     attachmentName,
     attachmentLink,
     isExercise,
@@ -95,7 +100,7 @@ export function createMessageBody(
     exerciseStart,
     exerciseDeadline,
     isExerciseFinished,
-    createdAt: createdAt,
+    createdAt,
   };
 
   return msgBody;

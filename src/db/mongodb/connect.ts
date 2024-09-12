@@ -3,9 +3,7 @@ import {
   PrivateMessage,
   PublicMessage,
 } from "../../lms/commonUtils/messageTypes";
-import dotenv from "dotenv";
-
-dotenv.config();
+import env from "../../env";
 
 const { Schema, model } = mongoose;
 
@@ -21,7 +19,8 @@ export const publicMessageSchema = new Schema<PublicMessage>({
   isAttachmentLarge: { type: Boolean, required: true },
   isAttachmentStored: { type: Boolean, required: true },
   isAttachmentSent: { type: Boolean, required: true },
-  attachmentStorageErrorCount: { type: Number, required: true },
+  attachmentDownloadErrorCount: { type: Number, required: true },
+  attachmentUploadErrorCount: { type: Number, required: true },
   attachmentName: { type: String },
   attachmentLink: { type: String },
   isExercise: { type: Boolean, required: true },
@@ -42,32 +41,31 @@ export const privateMessageSchema = new Schema<PrivateMessage>({
 
 // Message models
 export const publicQueueDB = model<PublicMessage>(
-  "PublicQueueDB",
+  "PublicQueueMessage",
   publicMessageSchema
 );
 
 export const publicSentDB = model<PublicMessage>(
-  "PublicSentDB",
+  "PublicSentMessage",
   publicMessageSchema
 );
 
 export const privateQueueDB = model<PrivateMessage>(
-  "PrivateQueueDB",
+  "PrivateQueueMessage",
   privateMessageSchema
 );
 
 export const privateSentDB = model<PrivateMessage>(
-  "PrivateSentDB",
+  "PrivateSentMessage",
   privateMessageSchema
 );
+
+const cookieSchema = new Schema({ cookie: String, updatedAt: Date });
+export const cookieDB = model("cookie", cookieSchema);
 
 const fileSchema = new Schema({ name: String, data: Buffer });
 export const fileDB = model("File", fileSchema);
 
 // DB connection
-const uri = process.env.MONGODB_URI;
 const dbName = "unif";
-if (!uri) {
-  throw new Error("MongoDB uri not found! Please specify one.");
-}
-mongoose.connect(uri, { dbName: dbName });
+mongoose.connect(env.MONGODB_URI, { dbName: dbName });

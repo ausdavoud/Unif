@@ -1,5 +1,10 @@
-import { PublicMessage } from "../lms/commonUtils/messageTypes";
+import { PrivateMessage, PublicMessage } from "../lms/commonUtils/messageTypes";
 import { Model } from "mongoose";
+import env from "../env";
+
+export async function welcomeMessageExists(dbSession: typeof Model) {
+  return !!dbSession.exists({ author: "unif" });
+}
 
 export async function fetchByAuthorText(
   dbSession: typeof Model,
@@ -14,6 +19,19 @@ export async function fetchByAuthorText(
   return oldMessagesInDB;
 }
 
+export async function fetchByAuthorDate(
+  dbSession: typeof Model,
+  message: PrivateMessage
+) {
+  const { author, sentAt } = message;
+  const oldMessageInDB = await dbSession.findOne({
+    author: author,
+    sentAt: sentAt,
+  });
+
+  return oldMessageInDB;
+}
+
 export async function putToDB(dbSession: typeof Model, data: any) {
   const insertResult = await dbSession.create(data);
   return insertResult;
@@ -22,15 +40,15 @@ export async function putToDB(dbSession: typeof Model, data: any) {
 export async function fetchMessagesWithNonStoredAttachment(
   dbSession: typeof Model
 ) {
-  const maxTry = process.env.MAX_TRY || 3;
   const idNameLinkPairs = await dbSession
     .find({
       hasAttachment: true,
       isAttachmentStored: false,
       isAttachmentLarge: false,
-      attachmentStorageErrorCount: { $lt: +maxTry },
+      attachmentDownloadErrorCount: { $lt: +env.MAX_DOWNLOAD_TRY },
     })
-    .select("id attachmentName attachmentLink");
+    .sort("attachmentDownloadErrorCount")
+    .select("_id attachmentName attachmentLink");
 
   return idNameLinkPairs;
 }
@@ -46,6 +64,22 @@ export async function storeFile(
 
 export async function incrementErrorCount(dbSession: typeof Model, id: any) {
   return await dbSession.findByIdAndUpdate(id, {
-    $inc: { attachmentStorageErrorCount: 1 },
+    $inc: { attachmentDownloadErrorCount: 1 },
   });
+}
+
+export async function getLatestCookie(dbSession: typeof Model) {
+  const cookie = await dbSession.findOne({});
+  return cookie;
+}
+
+export async function insertNewCookie(dbSession: typeof Model, cookie: string) {
+  return await dbSession.create({ cookie: cookie, updatedAt: new Date() });
+}
+
+export async function updateCookie(dbSession: typeof Model, cookie: string) {
+  return await dbSession.findOneAndReplace(
+    {},
+    { cookie: cookie, updateAt: new Date() }
+  );
 }

@@ -3,19 +3,23 @@ import {
   fetchMessagesWithNonStoredAttachment,
   incrementErrorCount,
 } from "../../src/db/dbService";
-import { getCookie, isCookieValid } from "../../src/lms/commonUtils/cookie";
+import {
+  getFreshCookie,
+  isCookieValid,
+} from "../../src/lms/commonUtils/cookie";
 import { getFileBuffer } from "../../src/lms/commonUtils/fileClient";
 import { storeFile } from "../../src/db/dbService";
 import { fileDB } from "../../src/db/mongodb/connect";
 import { constructAttachmentNameForDBStorage } from "../../src/lms/commonUtils/helpers";
+import env from "../../src/env";
 
 export async function testDownloadStoreFile() {
-  const username = process.env.LMS_USERNAME || "";
-  const password = process.env.LMS_PASSWORD || "";
+  const username = env.LMS_USERNAME;
+  const password = env.LMS_PASSWORD;
   console.log("username", username);
   console.log("password", password);
 
-  const cookie = await getCookie(username, password);
+  const cookie = await getFreshCookie(username, password);
   if (!isCookieValid(cookie)) {
     throw new Error("Cookie is not valid.");
   }
@@ -26,16 +30,15 @@ export async function testDownloadStoreFile() {
   idNameLinkTuples.slice(1, 2).forEach(async (message) => {
     const { _id, attachmentName, attachmentLink } = message;
     try {
-      const fullAttachmentLink = `http://lms.ui.ac.ir${attachmentLink}`;
-      const attachmentBuffer = await getFileBuffer(fullAttachmentLink, cookie);
-      const fullAttachmentName = constructAttachmentNameForDBStorage(
+      const attachmentBuffer = await getFileBuffer(attachmentLink, cookie);
+      const attachmentNameInDB = constructAttachmentNameForDBStorage(
         attachmentName,
         attachmentLink
       );
       const uploadResult = await storeFile(
         fileDB,
         attachmentBuffer,
-        fullAttachmentName
+        attachmentNameInDB
       );
     } catch (error) {
       await incrementErrorCount(publicQueueDB, _id);

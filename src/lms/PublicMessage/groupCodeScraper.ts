@@ -1,9 +1,9 @@
 import * as cheerio from "cheerio";
 import { getPageContent } from "../commonUtils/urlClient";
+import env from "../../env";
 
 export function getGroupCodes(cookie: string) {
-  const homePageURL = "http://lms.ui.ac.ir/members/home";
-  return getPageContent(homePageURL, cookie)
+  return getPageContent(env.HOME_URL, cookie)
     .then(selectGroupCodes)
     .catch((err) => {
       if (!err.handled) {

@@ -1,8 +1,9 @@
 import axios from "axios";
 import qs from "qs";
 import { getURL } from "./urlClient";
+import env from "../../env";
 
-export function getCookie(username: string, password: string) {
+export function getFreshCookie(username: string, password: string) {
   const axiosInstance = axios.create();
 
   const payload = qs.stringify({
@@ -13,7 +14,7 @@ export function getCookie(username: string, password: string) {
     method: "post",
     maxRedirects: 0,
     maxBodyLength: Infinity,
-    url: "http://lms.ui.ac.ir/login",
+    url: env.LOGIN_URL,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -39,7 +40,10 @@ export function getCookie(username: string, password: string) {
 }
 
 export function isCookieValid(cookie: string) {
-  const URL = "http://lms.ui.ac.ir/members/home";
+  if (!cookie) {
+    return false;
+  }
+  const URL = env.HOME_URL;
   const validity = getURL(URL, cookie)
     .then((res) => true)
     .catch((err) => {

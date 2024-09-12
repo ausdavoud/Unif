@@ -1,19 +1,22 @@
 import { publicQueueDB } from "../../src/db/mongodb/connect";
-import { ObjectType } from "deta/dist/types/types/basic";
-import { getCookie, isCookieValid } from "../../src/lms/commonUtils/cookie";
+import {
+  getFreshCookie,
+  isCookieValid,
+} from "../../src/lms/commonUtils/cookie";
 import {
   createMessageBody,
   findFeedMessages,
 } from "../../src/lms/PublicMessage/messageParser";
 import { getGroupCodes } from "../../src/lms/PublicMessage/groupCodeScraper";
 import { getGroupPageContent } from "../../src/lms/commonUtils/urlClient";
+import env from "../../src/env";
 
 export function testPushMessage() {
-  const username = process.env.LMS_USERNAME || "";
-  const password = process.env.LMS_PASSWORD || "";
+  const username = env.LMS_USERNAME;
+  const password = env.LMS_PASSWORD;
   console.log("username", username);
   console.log("password", password);
-  return getCookie(username, password)
+  return getFreshCookie(username, password)
     .then((cookie) => {
       if (!isCookieValid(cookie)) throw new Error();
       return cookie;
@@ -31,7 +34,7 @@ export function testPushMessage() {
       feedElements.forEach((feedElement) => {
         messages.push(createMessageBody(feedElement, "code for lesson"));
       });
-      return messages as ObjectType[];
+      return messages;
     })
     .then((messages) => {
       return publicQueueDB.insertMany(messages);

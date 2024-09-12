@@ -1,4 +1,5 @@
 import axios, { ResponseType } from "axios";
+import env from "../../env";
 
 function abortSignal(timeoutMs: number) {
   const abortController = new AbortController();
@@ -15,12 +16,11 @@ function toBuffer(data: string) {
 }
 
 export function getFileBuffer(URL: string, cookie: string) {
-  const maxAbortTime = process.env.MAX_ABORT_TIME || 10000;
   const axiosInstance = axios.create();
   axiosInstance.defaults.headers.Cookie = cookie;
   const config = {
     responseType: "arraybuffer" as ResponseType,
-    signal: abortSignal(+maxAbortTime),
+    signal: abortSignal(+env.MAX_DOWNLOAD_TIME),
   };
   const buff = axiosInstance
     .get(URL, config)

@@ -1,9 +1,13 @@
 import fs from "fs";
 import { createMessageBody } from "../../src/lms/PublicMessage/messageParser";
 import { findFeedMessages } from "../../src/lms/PublicMessage/messageParser";
-import { getCookie, isCookieValid } from "../../src/lms/commonUtils/cookie";
+import {
+  getFreshCookie,
+  isCookieValid,
+} from "../../src/lms/commonUtils/cookie";
 import { getGroupCodes } from "../../src/lms/PublicMessage/groupCodeScraper";
 import { getGroupPageContent } from "../../src/lms/commonUtils/urlClient";
+import env from "../../src/env";
 
 export function testLocalHTML() {
   const sampleHTML = fs.readFileSync("./src/lms/exampleGroupFeed.txt", {
@@ -14,12 +18,12 @@ export function testLocalHTML() {
 }
 
 export function testFindFeedMessages() {
-  const username = process.env.LMS_USERNAME || "";
-  const password = process.env.LMS_PASSWORD || "";
+  const username = env.LMS_USERNAME;
+  const password = env.LMS_PASSWORD;
   console.log("username", username);
   console.log("password", password);
   return (
-    getCookie(username, password)
+    getFreshCookie(username, password)
       .then((cookie) => {
         if (!isCookieValid(cookie)) throw new Error();
         return cookie;

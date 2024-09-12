@@ -67,8 +67,8 @@ export function addMessageHeaderFooter(
     newMessage.isAttachmentSent = oldMessage.isAttachmentSent;
     newMessage.isAttachmentLarge = oldMessage.isAttachmentLarge;
     newMessage.isAttachmentStored = oldMessage.isAttachmentStored;
-    newMessage.attachmentStorageErrorCount =
-      oldMessage.attachmentStorageErrorCount;
+    newMessage.attachmentDownloadErrorCount =
+      oldMessage.attachmentUploadErrorCount;
   }
   if (isExerciseNameChanged) {
     onExerciseName(newMessage, hasMajorChange, minorChanges);
@@ -105,7 +105,7 @@ function isXChanged(oldMessage: PublicMessage, newMessage: PublicMessage) {
   };
 }
 
-export function messagesAreDifferent(
+export function hasMessageChanged(
   newMessage: PublicMessage,
   oldMessage: PublicMessage
 ) {

@@ -27,3 +27,27 @@ export function constructAttachmentNameForDBStorage(
 export function extractNameFromFullDBName(fullAttachmentName: string) {
   return fullAttachmentName.split(nameSplitter).at(0);
 }
+
+
+export function constructWelcomeText(publicMessagesCount: number, privateMessagesCount: number) {
+  let text = "";
+  if (publicMessagesCount === 0 && privateMessagesCount === 0) {
+    text =
+      "ربات فعال شد ولی فعلا در LMS خبری نیست! به محض دریافت اولین پیام، مطلع خواهید شد.";
+  } else if (publicMessagesCount === 0 && privateMessagesCount !== 0) {
+    text =
+      "ربات فعال و " +
+      `${privateMessagesCount} پیام در صندوق شخصی یافت شد` +
+      "ولی فعال در آبشار خبری نیست. به محض دریافت پیام‌های بعدی مطلع خواهید شد.";
+  } else if (publicMessagesCount !== 0 && privateMessagesCount === 0) {
+    text =
+      "ربات فعال و " +
+      `${publicMessagesCount} پیام در آبشار شناسایی شدند. به محض دریافت پیام‌های بعدی مطلع خواهید شد.`;
+  } else {
+    text =
+      `${publicMessagesCount} پیام در آبشار و ${privateMessagesCount} پیام در صندوق شخصی شناسایی شدند.` +
+      "به محض دریافت پیام‌های بعدی مطلع خواهید شد.";
+  }
+
+  return text
+}

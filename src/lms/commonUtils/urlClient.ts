@@ -1,4 +1,5 @@
 import axios from "axios";
+import env from "../../env";
 
 export function getURL(
   URL: string,
@@ -35,8 +36,6 @@ export function getPageContent(URL: string, cookie: string) {
 }
 
 export function getGroupPageContent(groupSuffixURL: string, cookie: string) {
-  const baseURL = "http://lms.ui.ac.ir";
-  const groupURL = baseURL + groupSuffixURL; // suffixURL includes '/' at the beginning
-
+  const groupURL = env.BASE_URL + groupSuffixURL; // suffixURL includes '/' at the beginning
   return getPageContent(groupURL, cookie); // catches errors inside
 }

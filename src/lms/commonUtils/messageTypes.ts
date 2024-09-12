@@ -10,7 +10,8 @@ export type PublicMessage = {
   isAttachmentLarge: boolean;
   isAttachmentStored: boolean;
   isAttachmentSent: boolean;
-  attachmentStorageErrorCount: number;
+  attachmentDownloadErrorCount: number;
+  attachmentUploadErrorCount: number;
   attachmentName?: string;
   attachmentLink?: string;
   isExercise: boolean;
@@ -24,6 +25,7 @@ export type PublicMessage = {
 export type PrivateMessage = {
   author: string;
   sentAt: string;
+  header: string;
   title: string;
   link: string;
   createdAt: Date;

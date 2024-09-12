@@ -1,5 +1,8 @@
 import { publicQueueDB } from "../../src/db/mongodb/connect";
-import { getCookie, isCookieValid } from "../../src/lms/commonUtils/cookie";
+import {
+  getFreshCookie,
+  isCookieValid,
+} from "../../src/lms/commonUtils/cookie";
 import { getGroupCodes } from "../../src/lms/PublicMessage/groupCodeScraper";
 import { getGroupPageContent } from "../../src/lms/commonUtils/urlClient";
 import {
@@ -9,18 +12,19 @@ import {
 import { PublicMessage } from "../../src/lms/commonUtils/messageTypes";
 import {
   addMessageHeaderFooter,
-  messagesAreDifferent as hasMessageChanged,
+  hasMessageChanged as hasMessageChanged,
 } from "../../src/lms/PublicMessage/changeHandler";
 import { getLatestByDate } from "../../src/lms/commonUtils/helpers";
 import { fetchByAuthorText, putToDB } from "../../src/db/dbService";
+import env from "../../src/env";
 
 export async function testAsyncAnalyze() {
-  const username = process.env.LMS_USERNAME || "";
-  const password = process.env.LMS_PASSWORD || "";
+  const username = env.LMS_USERNAME;
+  const password = env.LMS_PASSWORD;
   console.log("username", username);
   console.log("password", password);
 
-  const cookie = await getCookie(username, password);
+  const cookie = await getFreshCookie(username, password);
   if (!isCookieValid(cookie)) {
     throw new Error("Cookie is not valid.");
   }
