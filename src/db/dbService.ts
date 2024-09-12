@@ -37,9 +37,7 @@ export async function putToDB(dbSession: typeof Model, data: any) {
   return insertResult;
 }
 
-export async function fetchMessagesWithNonStoredAttachment(
-  dbSession: typeof Model
-) {
+export async function getQueuedAttachments(dbSession: typeof Model) {
   const idNameLinkPairs = await dbSession
     .find({
       hasAttachment: true,

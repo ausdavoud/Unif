@@ -68,12 +68,11 @@ export function isCookieValid(cookie: string) {
   return validity;
 }
 
-export async function handleCookieRetrieval(
-  cookieDB: typeof Model,
-  username: string,
-  password: string
-) {
+export async function handleCookieRetrieval(cookieDB: typeof Model) {
   console.log("Retrieving cookies from the database.");
+
+  const username = env.LMS_USERNAME;
+  const password = env.LMS_PASSWORD;
 
   let cookie = await getLatestCookie(cookieDB);
   const cookieExists = Boolean(cookie);

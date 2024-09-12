@@ -1,6 +1,6 @@
 import { publicQueueDB } from "../../src/db/mongodb/connect";
 import {
-  fetchMessagesWithNonStoredAttachment,
+  getQueuedAttachments,
   incrementErrorCount,
 } from "../../src/db/dbService";
 import {
@@ -23,9 +23,7 @@ export async function testDownloadStoreFile() {
   if (!isCookieValid(cookie)) {
     throw new Error("Cookie is not valid.");
   }
-  const idNameLinkTuples = await fetchMessagesWithNonStoredAttachment(
-    publicQueueDB
-  );
+  const idNameLinkTuples = await getQueuedAttachments(publicQueueDB);
 
   idNameLinkTuples.slice(1, 2).forEach(async (message) => {
     const { _id, attachmentName, attachmentLink } = message;

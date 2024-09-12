@@ -1,25 +1,32 @@
-import { cookieDB } from "./db/mongodb/connect";
+import {
+  getQueuedAttachments,
+  incrementErrorCount,
+  storeFile,
+} from "./db/dbService";
+import { cookieDB, publicQueueDB } from "./db/mongodb/connect";
 import env from "./env";
 import { handleCookieRetrieval } from "./lms/commonUtils/cookie";
-
+import { getFileBuffer } from "./lms/commonUtils/fileClient";
+import { constructAttachmentNameForDBStorage } from "./lms/commonUtils/helpers";
+import { uploadFiles } from "./lms/services/files";
 import {
   handleWelcomeMessage,
   processPrivateMessages,
-  processPublicMessages,
-} from "./lms/PublicMessage/services";
+} from "./lms/services/privateMessage";
+
+import { processPublicMessages } from "./lms/services/publicMessages";
 
 async function lmsService() {
-  const username = env.LMS_USERNAME;
-  const password = env.LMS_PASSWORD;
-
-  const cookie = await handleCookieRetrieval(cookieDB, username, password);
-
+  const cookie = await handleCookieRetrieval(cookieDB);
   const { publicMessagesCount } = await processPublicMessages(cookie);
   const { privateMessagesCount } = await processPrivateMessages(cookie);
   await handleWelcomeMessage(publicMessagesCount, privateMessagesCount);
 }
 
-async function fileService() {}
-async function messengerService() {}
+async function fileService() {
+  const cookie = await handleCookieRetrieval(cookieDB);
+  const idNameLinkTuples = await getQueuedAttachments(publicQueueDB);
+  await uploadFiles(idNameLinkTuples, cookie);
+}
 
-lmsService();
+async function messengerService() {}
