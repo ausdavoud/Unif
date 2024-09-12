@@ -80,6 +80,6 @@ export async function insertNewCookie(dbSession: typeof Model, cookie: string) {
 export async function updateCookie(dbSession: typeof Model, cookie: string) {
   return await dbSession.findOneAndReplace(
     {},
-    { cookie: cookie, updateAt: new Date() }
+    { cookie: cookie, updatedAt: new Date() }
   );
 }
