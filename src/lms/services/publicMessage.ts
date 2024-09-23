@@ -1,22 +1,7 @@
-import {
-  fetchByAuthorDate,
-  fetchByAuthorText,
-  putToDB,
-  welcomeMessageExists,
-} from "../../db/dbService";
-import {
-  privateQueueDB,
-  privateSentDB,
-  publicQueueDB,
-  publicSentDB,
-} from "../../db/mongodb/connect";
-import { constructWelcomeText, getLatestByDate } from "../commonUtils/helpers";
-import { PrivateMessage } from "../commonUtils/messageTypes";
+import { fetchByQuery, putToDB } from "../../db/dbService";
+import { publicQueueDB, publicSentDB } from "../../db/mongodb/connect";
+import { getLatestByDate } from "../commonUtils/helpers";
 import { getGroupPageContent } from "../commonUtils/urlClient";
-import {
-  extractInboxMessages,
-  getPrivateInbox,
-} from "../PrivateMessage/messageParser";
 import {
   addMessageHeaderFooter,
   hasMessageChanged,
@@ -33,12 +18,12 @@ export async function processPublicMessages(cookie: string) {
 
   // Getting group codes
   console.log("Retrieving group codes.");
-  const groupCodes = await getGroupCodes(cookie);
+  let groupCodes = await getGroupCodes(cookie);
   if (groupCodes.length === 0) {
     throw new Error("No groups found in lms homepage.");
   }
   console.log(`A total of ${groupCodes.length} groups (classes) was found.`);
-  // const groupNames = ["/group/100593"];
+  // groupCodes = ["/group/100593"];
   let publicMessagesCount = 0;
   let newPublicMessagesCount = 0;
   groupCodes.forEach(async (groupCode) => {
@@ -58,16 +43,15 @@ export async function processPublicMessages(cookie: string) {
     feedMessages.forEach(async (feedMessage) => {
       const newMessageInFeed = createMessageBody(feedMessage, groupCode);
 
+      const { author, text } = newMessageInFeed;
+      const query = {
+        author,
+        text,
+      };
       console.log("Fetching queued messages with the same author and text.");
-      const fetchedMessagesInSentDB = await fetchByAuthorText(
-        publicSentDB,
-        newMessageInFeed
-      );
+      const fetchedMessagesInSentDB = await fetchByQuery(publicSentDB, query);
       console.log("Fetching sent messages with the same author and text.");
-      const fetchedMessagesInQueueDB = await fetchByAuthorText(
-        publicQueueDB,
-        newMessageInFeed
-      );
+      const fetchedMessagesInQueueDB = await fetchByQuery(publicQueueDB, query);
       const fetchedMessages = fetchedMessagesInSentDB.concat(
         fetchedMessagesInQueueDB
       );

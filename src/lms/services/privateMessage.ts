@@ -1,7 +1,12 @@
-import { fetchByAuthorDate, welcomeMessageExists } from "../../db/dbService";
-import { privateQueueDB, privateSentDB } from "../../db/mongodb/connect";
+import { fetchByQuery, existsInDB, putToDB } from "../../db/dbService";
+import {
+  privateQueueDB,
+  privateSentDB,
+  publicQueueDB,
+  publicSentDB,
+} from "../../db/mongodb/connect";
 import { constructWelcomeText } from "../commonUtils/helpers";
-import { PrivateMessage } from "../commonUtils/messageTypes";
+import { PrivateMessage, PublicMessage } from "../commonUtils/messageTypes";
 import {
   extractInboxMessages,
   getPrivateInbox,
@@ -18,50 +23,46 @@ export async function processPrivateMessages(cookie: string) {
   const privateMessagesCount = privateMessages.length;
   let newPrivateMessagesCount = 0;
   console.log(`A total of ${privateMessagesCount} private messages was found.`);
-  privateMessages.forEach(
-    async (privateMessage: {
-      author: string;
-      sentAt: string;
-      header: string;
-      title: string;
-      link: string;
-      createdAt: Date;
-    }) => {
-      console.log("Fetching sent messages with the same author and date.");
-      const fetchedMessagesInSentDB = await fetchByAuthorDate(
-        privateSentDB,
-        privateMessage
+  privateMessages.forEach(async (privateMessage) => {
+    const { author, sentAt } = privateMessage;
+    const query = {
+      author,
+      sentAt,
+    };
+    console.log("Fetching sent messages with the same author and date.");
+    const fetchedMessagesInSentDB: PrivateMessage[] = await fetchByQuery(
+      privateSentDB,
+      query
+    );
+    let fetchedMessages = [];
+    if (fetchedMessagesInSentDB.length !== 0) {
+      console.log(
+        `Found ${fetchedMessagesInSentDB.length} similar sent private message(s)`
       );
-      let fetchedMessages = [];
-      if (fetchedMessagesInSentDB) {
-        console.log(
-          `Found ${fetchedMessagesInSentDB.length} similar private message(s)`
-        );
-        fetchedMessages = fetchedMessagesInSentDB;
-      } else {
-        console.log(
-          "No similar sent private messages were found. Searching in queue..."
-        );
-        const fetchedMessagesInQueueDB = await fetchByAuthorDate(
-          privateQueueDB,
-          privateMessage
-        );
-        fetchedMessages = fetchedMessagesInQueueDB;
-      }
-      if (fetchedMessages) {
-        console.log(
-          "No similar queued private messages were found either. " +
-            "This private message was not new."
-        );
-        return;
-      }
-
-      console.log("New private message found. Inserting into queue.");
-      newPrivateMessagesCount += 1;
-      const response = await privateQueueDB.create(privateMessage);
-      console.log("New private message inserted into the queue.");
+      fetchedMessages = fetchedMessagesInSentDB;
+    } else {
+      console.log(
+        "No similar sent private messages were found. Searching in queue..."
+      );
+      const fetchedMessagesInQueueDB = await fetchByQuery(
+        privateQueueDB,
+        query
+      );
+      fetchedMessages = fetchedMessagesInQueueDB;
     }
-  );
+    if (fetchedMessages.length !== 0) {
+      console.log(
+        "Similar queued private messages were found. " +
+          "This private message was not new."
+      );
+      return;
+    }
+    console.log("No similar message was found in private queue either.");
+    console.log("New private message found. Inserting into queue.");
+    newPrivateMessagesCount += 1;
+    const response = await privateQueueDB.create(privateMessage);
+    console.log("New private message inserted into the queue.");
+  });
 
   console.log(
     `A total of ${privateMessagesCount} private message found in inbox, ` +
@@ -76,24 +77,35 @@ export async function handleWelcomeMessage(
   publicMessagesCount: number,
   privateMessagesCount: number
 ) {
-  if (
-    !welcomeMessageExists(privateSentDB) &&
-    !welcomeMessageExists(privateQueueDB)
-  ) {
+  const query = {
+    author: "یونیف",
+  };
+  console.log("Handling Welcome Message");
+  const isWelcomeInQueue = await existsInDB(publicSentDB, query);
+  const isWelcomeInSent = await existsInDB(publicQueueDB, query);
+  if (!isWelcomeInQueue && !isWelcomeInSent) {
     console.log("No welcome message found. Creating one...");
     const text = constructWelcomeText(
       publicMessagesCount,
       privateMessagesCount
     );
-    const welcomeMessage: PrivateMessage = {
+    const welcomeMessage: PublicMessage = {
+      groupName: "unif",
       author: "یونیف",
       sentAt: "یک روز زیبا و خنک",
-      header: text,
-      title: "پیام خوش‌آمد گویی",
-      link: "dnosrati.com",
       createdAt: new Date(),
+      header: "پیام خوش آمدگویی",
+      text: text,
+      hasAttachment: false,
+      isAttachmentLarge: false,
+      isAttachmentStored: false,
+      isAttachmentSent: false,
+      attachmentDownloadErrorCount: 0,
+      attachmentUploadErrorCount: 0,
+      isExercise: false,
+      isExerciseFinished: false,
     };
     console.log("Inserting welcome message to the queue.");
-    await privateQueueDB.create(welcomeMessage);
+    await putToDB(publicQueueDB, welcomeMessage);
   }
 }

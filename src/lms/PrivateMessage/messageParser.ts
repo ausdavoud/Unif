@@ -29,7 +29,7 @@ export function extractInboxMessages(pageContent: string) {
     let title = $(elem).find("div:nth-of-type(3) p a").text();
     let link = $(elem).find("div:nth-of-type(3) p a").attr("href")!;
     link = env.BASE_URL + link;
-    const header = `یک پیام خصوصی جدید از ${author}`;
+    const header = ``;
 
     let privateMessage = {
       author,

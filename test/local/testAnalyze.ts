@@ -1,22 +1,20 @@
+import { fetchByQuery, putToDB } from "../../src/db/dbService";
 import { publicQueueDB } from "../../src/db/mongodb/connect";
+import env from "../../src/env";
 import {
   getFreshCookie,
   isCookieValid,
 } from "../../src/lms/commonUtils/cookie";
-import { getGroupCodes } from "../../src/lms/PublicMessage/groupCodeScraper";
+import { getLatestByDate } from "../../src/lms/commonUtils/helpers";
 import { getGroupPageContent } from "../../src/lms/commonUtils/urlClient";
 import {
-  findFeedMessages,
-  createMessageBody,
-} from "../../src/lms/PublicMessage/messageParser";
-import { PublicMessage } from "../../src/lms/commonUtils/messageTypes";
-import {
   addMessageHeaderFooter,
-  hasMessageChanged as hasMessageChanged,
+  hasMessageChanged,
 } from "../../src/lms/PublicMessage/changeHandler";
-import { getLatestByDate } from "../../src/lms/commonUtils/helpers";
-import { fetchByAuthorText, putToDB } from "../../src/db/dbService";
-import env from "../../src/env";
+import {
+  createMessageBody,
+  findFeedMessages,
+} from "../../src/lms/PublicMessage/messageParser";
 
 export async function testAsyncAnalyze() {
   const username = env.LMS_USERNAME;
@@ -41,10 +39,12 @@ export async function testAsyncAnalyze() {
 
     feedMessages.forEach(async (feedMessage) => {
       const newMessageInFeed = createMessageBody(feedMessage, groupName);
-      const fetchedMessages = await fetchByAuthorText(
-        publicQueueDB,
-        newMessageInFeed
-      );
+      const { author, text } = newMessageInFeed;
+      const query = {
+        author,
+        text,
+      };
+      const fetchedMessages = await fetchByQuery(publicQueueDB, query);
       const oldMessagesInDB = fetchedMessages;
       const oldMessageInDB = getLatestByDate(oldMessagesInDB);
       if (!hasMessageChanged(newMessageInFeed, oldMessageInDB)) {

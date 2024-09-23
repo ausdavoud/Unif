@@ -16,7 +16,6 @@ export function addMessageHeaderFooter(
   oldMessage: PublicMessage
 ) {
   if (!oldMessage) {
-    newMessage.header = `پیام جدید از ${newMessage.author}`;
     return;
   }
   const {
@@ -78,12 +77,7 @@ export function addMessageHeaderFooter(
     onExerciseStart(newMessage, hasMajorChange, minorChanges);
     hasMajorChange = true;
   }
-
-  const whiteSpace = "‌";
-  if (minorChanges) {
-    const footerText = `${minorChanges.join("\n- ")} \n${whiteSpace}`;
-    newMessage.footer = footerText;
-  }
+  newMessage.footer = minorChanges;
 }
 
 function isXChanged(oldMessage: PublicMessage, newMessage: PublicMessage) {

@@ -1,10 +1,12 @@
+import { ObjectId } from "mongoose";
+
 export type PublicMessage = {
-  _id?: string;
+  _id?: ObjectId;
   groupName: string;
   author: string;
   header?: string;
   text: string;
-  footer?: string;
+  footer?: string[];
   sentAt: string;
   hasAttachment: boolean;
   isAttachmentLarge: boolean;
@@ -23,6 +25,7 @@ export type PublicMessage = {
 };
 
 export type PrivateMessage = {
+  _id?: ObjectId;
   author: string;
   sentAt: string;
   header: string;

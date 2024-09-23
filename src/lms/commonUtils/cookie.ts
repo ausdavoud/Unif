@@ -74,7 +74,7 @@ export async function handleCookieRetrieval(cookieDB: typeof Model) {
   const username = env.LMS_USERNAME;
   const password = env.LMS_PASSWORD;
 
-  let cookie = await getLatestCookie(cookieDB);
+  let cookie = await getLatestCookie();
   const cookieExists = Boolean(cookie);
 
   if (!cookieExists) {
@@ -85,7 +85,7 @@ export async function handleCookieRetrieval(cookieDB: typeof Model) {
     console.log("Cookie found in the database.");
 
     try {
-      if (isCookieValid(cookie)) {
+      if (await isCookieValid(cookie)) {
         console.log("Cookie is valid.");
         return cookie;
       } else {
@@ -109,9 +109,9 @@ export async function handleCookieRetrieval(cookieDB: typeof Model) {
   console.log("Cookie was refreshed and tested.");
 
   if (cookieExists) {
-    await updateCookie(cookieDB, cookie);
+    await updateCookie(cookie);
   } else {
-    await insertNewCookie(cookieDB, cookie);
+    await insertNewCookie(cookie);
   }
 
   console.log("Cookie was saved in the database.");

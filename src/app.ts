@@ -1,32 +1,22 @@
-import {
-  getQueuedAttachments,
-  incrementErrorCount,
-  storeFile,
-} from "./db/dbService";
-import { cookieDB, publicQueueDB } from "./db/mongodb/connect";
+import { Bot } from "grammy";
+
 import env from "./env";
-import { handleCookieRetrieval } from "./lms/commonUtils/cookie";
-import { getFileBuffer } from "./lms/commonUtils/fileClient";
-import { constructAttachmentNameForDBStorage } from "./lms/commonUtils/helpers";
-import { uploadFiles } from "./lms/services/files";
+import { MyContext, setupBot } from "./messanger/telegram";
+import { fileService, lmsService, messengerService } from "./services";
 import {
-  handleWelcomeMessage,
-  processPrivateMessages,
-} from "./lms/services/privateMessage";
+  privateQueueDB,
+  publicQueueDB,
+  publicSentDB,
+} from "./db/mongodb/connect";
 
-import { processPublicMessages } from "./lms/services/publicMessages";
+async function main() {
+  const bot = new Bot<MyContext>(env.BOT_TOKEN);
+  await setupBot(bot);
+  bot.start();
 
-async function lmsService() {
-  const cookie = await handleCookieRetrieval(cookieDB);
-  const { publicMessagesCount } = await processPublicMessages(cookie);
-  const { privateMessagesCount } = await processPrivateMessages(cookie);
-  await handleWelcomeMessage(publicMessagesCount, privateMessagesCount);
+  // await lmsService();
+  // await fileService();
+  await messengerService(bot);
 }
 
-async function fileService() {
-  const cookie = await handleCookieRetrieval(cookieDB);
-  const idNameLinkTuples = await getQueuedAttachments(publicQueueDB);
-  await uploadFiles(idNameLinkTuples, cookie);
-}
-
-async function messengerService() {}
+main();
